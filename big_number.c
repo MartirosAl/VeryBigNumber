@@ -69,6 +69,7 @@ void PrintBN(BigNumber* bn_)
 
 BigNumber* SumBN(BigNumber* bn1_, BigNumber* bn2_)
 {
+
 	
 	BigNumber* result = malloc(sizeof(BigNumber));
 	if (result == NULL)
@@ -76,44 +77,44 @@ BigNumber* SumBN(BigNumber* bn1_, BigNumber* bn2_)
 		printf("Memory allocation error");
 		return 0;
 	}
+	result->digits = (digit*)calloc(MaxBN_size(bn1_, bn2_) + 1, sizeof(digit));
 
-	unsigned int max_size;
-	unsigned int min_size;
+	if (!(bn1_->is_negative == bn2_->is_negative))
+		return -20;
 
-	if (bn1_->size > bn2_->size)
+	result->is_negative = bn1_->is_negative;
+
+	unsigned int rank = 0;
+	int digit = 0;
+	int dif = abs(bn1_->size - bn2_->size);
+
+	char* minbn = NULL;
+	char* maxbn = NULL;
+	if (MinBN(bn1_, bn2_) == 0)
 	{
-		max_size = bn1_->size;
-		min_size = bn2_->size;
+		minbn = bn1_->digits;
+		maxbn = bn2_->digits;
 	}
 	else
 	{
-		max_size = bn2_->size;
-		min_size = bn1_->size;
+		minbn = bn2_->digits;
+		maxbn = bn1_->digits;
 	}
 
-	result->size = max_size + 1;
-	int dif_size = max_size - min_size;
 
-	result->digits = calloc(result->size, sizeof(digit));
-	if (result->digits == NULL)
+	for (long int i = (long int)(MinBN_size(bn1_, bn2_)) - 1; i >= 0; i--)
 	{
-		printf("Memory allocation error");
-		free(result->digits);
-		return 0;
+		digit = (int)(maxbn[i + dif]) + (int)(minbn[i]) + rank;
+		result->digits[i + dif + 1] = digit % 10;
+		rank = digit / 10;
 	}
-	
-	if (bn1_->is_negative && bn2_->is_negative || (!MinBN(bn1_, bn2_) && !bn1_->is_negative) || (MinBN(bn1_, bn2_) && !bn1_->is_negative)) //Если оба положительные или если у максимального числа положительный знак, то знак результата положительный
-		result->is_negative = 0;
-	else
-		result->is_negative = 1;
-
-	for (int i = 0; i < MinBN_size(bn1_, bn2_) + dif_size; i++)
+	for (long int i = dif - 1; i >= 0; i--)
 	{
-		if (dif_size == 0)
-		{
-			result->digits[i] = bn1_->digits[i] + bn2_->digits[i];!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Сделать перенос, сделать знаки ( в том числе минус) решить проблему с тем, что в конце 0
-		}
+		digit = (int)(maxbn[i] + rank);
+		result->digits[i + 1] = digit % 10;
+		rank = digit / 10;
 	}
+	result->digits[0] = rank;
 
 	PrintBN(result);
 	
