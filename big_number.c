@@ -102,7 +102,7 @@ BigNumber* SumBN(BigNumber* bn1_, BigNumber* bn2_)
 	}
 
 
-	for (long int i = (long int)(MinBN_size(bn1_, bn2_)) - 1; i >= 0; i--)
+	for (long int i = MinBN_size(bn1_, bn2_) - 1; i >= 0; i--)
 	{
 		digit = (int)(maxbn[i + dif]) + (int)(minbn[i]) + rank;
 		result->digits[i + dif + 1] = digit % 10;
@@ -115,6 +115,8 @@ BigNumber* SumBN(BigNumber* bn1_, BigNumber* bn2_)
 		rank = digit / 10;
 	}
 	result->digits[0] = rank;
+
+	result->size = MaxBN_size(bn1_, bn2_) + 1;
 
 	PrintBN(result);
 	
