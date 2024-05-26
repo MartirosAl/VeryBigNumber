@@ -36,10 +36,16 @@ void PrintBN(BigNumber* bn_);
 */
 BigNumber* SumBN(BigNumber* bn1_, BigNumber* bn2_);
 
+BigNumber* DiffBN(BigNumber* bn1_, BigNumber* bn2_);
 /*
-* @brief Сравнение двух больших чисел
+* @brief Сравнение двух больших чисел по модулю
 * @param bn1_, bn2_ : Большие числа
 * @return 0, если большое число 1 < большого числа 2, 1 иначе
 */
 int MinBN(BigNumber* bn1_, BigNumber* bn2_);
 
+int MinBN_size(BigNumber* bn1_, BigNumber* bn2_);
+
+int MaxBN_size(BigNumber* bn1_, BigNumber* bn2_);
+
+void CopyBN(BigNumber* bn1_, BigNumber* bn2_);
