@@ -37,6 +37,10 @@ void PrintBN(BigNumber* bn_);
 BigNumber* SumBN(BigNumber* bn1_, BigNumber* bn2_);
 
 BigNumber* DiffBN(BigNumber* bn1_, BigNumber* bn2_);
+
+BigNumber* ProdBN(BigNumber* bn1_, BigNumber* bn2_);
+
+BigNumber* DivBN(BigNumber* bn1_, BigNumber* bn2_);
 /*
 * @brief Сравнение двух больших чисел по модулю
 * @param bn1_, bn2_ : Большие числа

@@ -21,6 +21,8 @@ int main()
 
     ProdBN(bn, bn2);
 
+    DivBN(bn, bn2);
+
     PrintBN(bn);
 
     PrintBN(bn2);
