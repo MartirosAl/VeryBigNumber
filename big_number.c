@@ -61,7 +61,7 @@ void PrintBN(BigNumber* bn_)
     if (bn_->is_negative)
         printf("-");
     
-    for (size_t i = 0; i < bn_->size; ++i)
+    for (unsigned int i = 0; i < bn_->size; ++i)
         printf("%u", bn_->digits[i]);
         
     printf("\n");
@@ -82,8 +82,25 @@ BigNumber* SumBN(BigNumber* bn1_, BigNumber* bn2_)
 		return 0;
 	}
 
-	if (!(bn1_->is_negative == bn2_->is_negative))
+	if (bn1_->is_negative != bn2_->is_negative)
 	{
+		if (bn1_->size == bn2_->size)
+		{	
+			int flag = 0;
+			for (int i = 0; i < bn1_->size; i++)
+			{
+				if (bn1_->digits[i] != bn2_->digits[i])
+					flag = 1;
+			}
+			if (flag == 0)
+			{
+				result->digits[0] = 0;
+				result->is_negative = 0;
+				result->size = 1;
+				PrintBN(result);
+				return result;
+			}
+		}
 		if (MinBN(bn1_, bn2_) == 0)
 			if (bn1_->is_negative == 1)
 			{
@@ -162,7 +179,7 @@ BigNumber* SumBN(BigNumber* bn1_, BigNumber* bn2_)
 
 BigNumber* DiffBN(BigNumber* bn1_, BigNumber* bn2_)
 {
-	BigNumber* result = malloc(sizeof(BigNumber));
+	BigNumber* result = (BigNumber*)malloc(sizeof(BigNumber));
 	if (result == NULL)
 	{
 		printf("Memory allocation error");
@@ -170,14 +187,13 @@ BigNumber* DiffBN(BigNumber* bn1_, BigNumber* bn2_)
 	}
 
 	result->digits = (digit*)calloc(MaxBN_size(bn1_, bn2_), sizeof(digit));
-
 	if (result->digits == NULL)
 	{
 		printf("Memory allocation error");
 		return 0;
 	}
 
-	if (!(bn1_->is_negative == bn2_->is_negative))
+	if (bn1_->is_negative != bn2_->is_negative)
 	{
 		if (bn1_->is_negative == 1)
 		{
@@ -201,7 +217,44 @@ BigNumber* DiffBN(BigNumber* bn1_, BigNumber* bn2_)
 	int num = 0;
 	int dif = abs(bn1_->size - bn2_->size);
 
-	if (MinBN(bn1_, bn2_) == 1)
+	if (MinBN(bn1_, bn2_) == 0)
+	{
+		int flag = 0;
+		for (int i = 0; i < bn1_->size; i++)
+		{
+			if (bn1_->digits[i] != bn2_->digits[i])
+				flag = 1;
+		}
+		if (flag == 0)
+		{
+			result->digits[0] = 0;
+			result->is_negative = 0;
+			result->size = 1;
+			PrintBN(result);
+			return result;
+		}
+		BigNumber* temp = malloc(sizeof(BigNumber));
+		if (temp == NULL)
+		{
+			printf("Memory allocation error");
+			return 0;
+		}
+		temp->digits = (digit*)calloc(MaxBN_size(bn1_, bn2_), sizeof(digit));
+		if (temp->digits == NULL)
+		{
+			printf("Memory allocation error");
+			return 0;
+		}
+
+		CopyBN(bn1_, result);
+		result->is_negative = !(bn1_->is_negative);
+		CopyBN(bn2_, temp);
+		temp->is_negative = !(bn2_->is_negative);
+		result = DiffBN(temp, result);
+
+		return result;
+	}
+	else
 	{
 		for (long int i = bn2_->size - 1; i >= 0; i--)
 		{
@@ -229,7 +282,7 @@ BigNumber* DiffBN(BigNumber* bn1_, BigNumber* bn2_)
 				rank = 0;
 			result->digits[i + 1] = (char)(num % 10);
 		}
-		
+
 		unsigned int maxsize = MaxBN_size(bn1_, bn2_);
 		while (result->digits[0] == 0 && maxsize > 0)
 		{
@@ -244,28 +297,6 @@ BigNumber* DiffBN(BigNumber* bn1_, BigNumber* bn2_)
 			result->size = 1;
 			result->digits[0] = 0;
 		}
-	}
-	else
-	{
-		BigNumber* temp = malloc(sizeof(BigNumber));
-		if (temp == NULL)
-		{
-			printf("Memory allocation error");
-			return 0;
-		}
-		temp->digits = (digit*)calloc(MaxBN_size(bn1_, bn2_), sizeof(digit));
-		if (temp->digits == NULL)
-		{
-			printf("Memory allocation error");
-			return 0;
-		}
-		CopyBN(bn1_, result);
-		result->is_negative = !(bn1_->is_negative);
-		CopyBN(bn2_, temp);
-		temp->is_negative = !(bn2_->is_negative);
-		result = DiffBN(temp, result);
-
-		return result;
 	}
 
 	PrintBN(result);
@@ -289,67 +320,66 @@ BigNumber* ProdBN(BigNumber* bn1_, BigNumber* bn2_)
 	}
 
 	if (bn2_->digits == 0 || bn1_->digits == 0)
-	{
 		result->is_negative = 0;
-		result->size = 1;
-		result->digits = 0;
-	}
+	else
+		result->is_negative = 1;
+	result->size = bn1_->size + bn2_->size;
 
-	BigNumber* temp1 = malloc(sizeof(BigNumber));
-	if (temp1 == NULL)
+	BigNumber* temp = malloc(sizeof(BigNumber));
+	if (temp == NULL)
 	{
 		printf("Memory allocation error");
 		return 0;
 	}
-	temp1->digits = (digit*)calloc(2 * MaxBN_size(bn1_, bn2_), sizeof(digit));
-	if (temp1->digits == NULL)
+	temp->digits = (digit*)calloc(2 * MaxBN_size(bn1_, bn2_), sizeof(digit));
+	if (temp->digits == NULL)
 	{
 		printf("Memory allocation error");
 		return 0;
 	}
-	temp1->is_negative = 0;
-	temp1->size = 1;
+	CopyBN(bn1_, temp);
 
-	BigNumber* temp2 = malloc(sizeof(BigNumber));
-	if (temp2 == NULL)
+	int k = bn1_->size + bn2_->size - 1;
+	int s = 0;
+	for (int i = 0; i < bn1_->size; i++)
 	{
-		printf("Memory allocation error");
-		return 0;
-	}
-	temp2->digits = (digit*)calloc(2 * MaxBN_size(bn1_, bn2_), sizeof(digit));
-	if (temp2->digits == NULL)
-	{
-		printf("Memory allocation error");
-		return 0;
-	}
-	temp2->is_negative = 0;
-	temp2->size = 1;
-
-	int left_shift = 0;
-
-	for (long int i = bn2_->size - 2; i >= 0; i--)
-	{
-		int carry = 0, k = left_shift;
-		for (long int j = bn1_->size - 2; j >= 0; j--)
+		for (int j = 0; j < bn2_->size; j++)
 		{
-			int partial_result = (bn1_->digits[j] - '0') * (bn2_->digits[i] - '0') + carry;
-			if (result_arr[k])
-				partial_result += result_arr[k] - '0';
-			result_arr[k++] = partial_result % 10 + '0';
-			carry = partial_result / 10;
+			int p = (int)bn1_->digits[bn1_->size - i - 1] * (int)bn2_->digits[bn2_->size - j - 1];
+			s = i + j;
+			while (p > 0)
+			{
+				result->digits[k - s] += (char)p % 10;
+				p /= 10;
+				s++;
+				if (s > k)
+				{
+					s = k;
+				}
+			}
 		}
-		if (carry > 0)
-			result_arr[k] = carry + '0';
-		left_sh
-	
+	}
+
+	result->size = bn1_->size + bn2_->size;
+
+	unsigned int maxsize = MaxBN_size(bn1_, bn2_);
+	if (result->digits[0] == 0)
+	{
+		for (long int i = 1; i <= (long)maxsize; i++)
+			result->digits[i - 1] = result->digits[i];
+		result->size--;
+	}
 
 	if (bn1_->is_negative == bn2_->is_negative)
 		result->is_negative = 0;
 	else
 		result->is_negative = 1;
+
 	PrintBN(result);
 	return(result);
 }
+
+
 
 int MinBN(BigNumber* bn1_, BigNumber* bn2_)
 {
