@@ -3,12 +3,12 @@
 
 int main()
 {
-    char str[] = "-1";
+    char str[] = "6";
     BigNumber* bn = CreateBN(str);
     if (bn == NULL)
         printf("bn == NULL!\n");
 
-    char rts[] = "-1";
+    char rts[] = "2";
     BigNumber* bn2 = CreateBN(rts);
     if (bn2 == NULL)
        printf("bn2 == NULL!\n");

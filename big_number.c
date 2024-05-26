@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "my_string.h"
 #include "big_number.h"
 
 BigNumber* CreateBN(char* number_)
@@ -380,56 +379,27 @@ BigNumber* ProdBN(BigNumber* bn1_, BigNumber* bn2_)
 
 BigNumber* DivBN(BigNumber* bn1_, BigNumber* bn2_)
 {
-	BigNumber* result = malloc(sizeof(BigNumber));
-	if (result == NULL)
-	{
-		printf("Memory allocation error");
-		return 0;
-	}
-	result->digits = (digit*)calloc(MaxBN_size(bn1_, bn2_), sizeof(digit));
-	if (result->digits == NULL)
-	{
-		printf("Memory allocation error");
-		return 0;
-	}
+   BigNumber* result = (BigNumber*)malloc(sizeof(BigNumber));
+   if (result == NULL)return(NULL);
 
-	BigNumber* temp = malloc(sizeof(BigNumber));
-	if (temp == NULL)
+   char* zero = "0";
+   result = CreateBN(zero);
+
+   char* one = "1";
+   BigNumber* ones = (BigNumber*)malloc(sizeof(BigNumber));
+   if (ones == NULL)return NULL; 
+   ones = CreateBN(one);
+
+   BigNumber* temp = (BigNumber*)malloc(sizeof(BigNumber));
+   if (temp == NULL)return NULL;
+   int cpy = bn1_->is_negative;
+   *temp = *bn1_;
+
+	while (temp->is_negative == cpy && !(temp->size == 1 && temp->digits[0] == 0) && MinBN(bn1_, bn2_) == 1)
 	{
-		printf("Memory allocation error");
-		return 0;
+		*result = *(SumBN(result, ones));
+		*temp = *(DiffBN(temp, bn2_));
 	}
-	temp->digits = (digit*)calloc(MaxBN_size(bn1_, bn2_), sizeof(digit));
-	if (temp->digits == NULL)
-	{
-		printf("Memory allocation error");
-		return 0;
-	}
-	temp->is_negative = 0;
-
-	int rank = 0;
-	int shift = 0;
-	unsigned int j = 0;
-	for (unsigned int i = 0; i < bn1_->size; i++)
-	{
-		temp->digits[shift] = (char)bn1_->digits[i];
-		if (MinBN(temp, bn2_) == 0)
-		{
-			result->digits[j++] = 0;
-		}
-		else
-		{
-			result->digits[j++] = temp->digits / bn2_->digits;
-			temp->digits = temp->digits % bn2_->digits;
-		}
-	}
-
-
-	if (bn1_->is_negative == bn2_->is_negative)
-		result->is_negative = 0;
-	else
-		result->is_negative = 1;
-
 	PrintBN(result);
 	return(result);
 }
